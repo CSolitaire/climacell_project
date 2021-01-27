@@ -1,6 +1,6 @@
-import requests
 import pandas as pd
 import numpy as np
+import requests
 import os
 from env import key, client
 import scipy as sp 
@@ -11,9 +11,6 @@ from dateutil.relativedelta import *
 #################### Acquire ##################
 
 def api_get():
-    '''
-    Function that calls data from api Daily and adds its to dataframe
-    '''
     stop = datetime.now().isoformat()
     start = (datetime.now() - relativedelta(days=1)).isoformat()
 
@@ -28,13 +25,41 @@ def api_get():
                "fields":['temp','wind_speed','precipitation','baro_pressure'],
               }
 
-
     response = requests.request("GET", url, params=querystring)
     data = response.json()
-    temp = pd.DataFrame(data)
-    df = pd.read_csv('climate_data.csv', index_col=0)
-    # maybe json file if too slow?
-    df.append(temp, ignore_index=True)
+    df = pd.DataFrame(data)
+    return df
+
+def data_clean(df):
+    #Modify Temp
+    df['temp'] = df['temp'].astype(str)
+    df['temp_degree_c']=df['temp'].str.extract(r'(\d+)')
+    df.drop(columns =['temp'], inplace = True)
+    #Modify Baro-Pressure
+    df['baro_pressure'] = df['baro_pressure'].astype(str)
+    df['baro_pressure_hPa']=df['baro_pressure'].str.extract(r'(\d+)')
+    df.drop(columns =['baro_pressure'], inplace = True)
+    #Modify Wind_speed
+    df['wind_speed'] = df['wind_speed'].astype(str)
+    df['wind_speed_m/s']=df['wind_speed'].str.extract(r'(\d+)')
+    df.drop(columns =['wind_speed'], inplace = True)
+    #Modify preciatation
+    df['precipitation'] = df['precipitation'].astype(str)
+    df['precipitation_mm/hr']=df['precipitation'].str.extract(r'(\d+)')
+    df.drop(columns =['precipitation'], inplace = True)
+    #Modify observation_time
+    df['observation_time']= df['observation_time'].astype(str)
+    df['observation_time']= df['observation_time'].str.extract(r'(\d+.\d+.\d+\d+.\d+.\d+)')
+    df['observation_time']= df['observation_time'].str.replace('T',' ')
+    df['precipitation_mm/hr'] = df['precipitation_mm/hr'].fillna(0)
+    return df
+
+def get_climacell_data():
+    df = api_get()
+    df = data_clean(df)
+    df_old = pd.read_csv('climate_data.csv', index_col=0)
+    merge = [df_old, df]
+    df = pd.concat(merge)
     df.to_csv('climate_data.csv')
     return df
 
