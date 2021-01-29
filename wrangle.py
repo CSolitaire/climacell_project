@@ -54,15 +54,6 @@ def data_clean(df):
     df['precipitation_mm/hr'] = df['precipitation_mm/hr'].fillna(0)
     return df
 
-def get_climacell_data():
-    df = api_get()
-    df = data_clean(df)
-    df_old = pd.read_csv('climate_data.csv', index_col=0)
-    merge = [df_old, df]
-    df = pd.concat(merge)
-    df.to_csv('climate_data.csv')
-    return df
-
 def data_clean(df):
     '''
     Function modifies the colums to make sense
@@ -71,16 +62,19 @@ def data_clean(df):
     df['temp'] = df['temp'].astype(str)
     df['temp_degree_c']=df['temp'].str.extract(r'(\d+)')
     df.drop(columns =['temp'], inplace = True)
+    df['temp_degree_c']=df['temp_degree_c'].fillna(0)
     df['temp_degree_c']=df['temp_degree_c'].astype(int)
     #Modify Baro-Pressure
     df['baro_pressure'] = df['baro_pressure'].astype(str)
     df['baro_pressure_hPa']=df['baro_pressure'].str.extract(r'(\d+)')
     df.drop(columns =['baro_pressure'], inplace = True)
+    df['baro_pressure_hPa']=df['baro_pressure_hPa'].fillna(0)
     df['baro_pressure_hPa']=df['baro_pressure_hPa'].astype(int)
     #Modify Wind_speed
     df['wind_speed'] = df['wind_speed'].astype(str)
     df['wind_speed_m/s']=df['wind_speed'].str.extract(r'(\d+)')
     df.drop(columns =['wind_speed'], inplace = True)
+    df['wind_speed_m/s']=df['wind_speed_m/s'].fillna(0)
     df['wind_speed_m/s']=df['wind_speed_m/s'].astype(int)
     #Modify preciatation
     df['precipitation'] = df['precipitation'].astype(str)
@@ -96,7 +90,27 @@ def data_clean(df):
     return df
 
 def get_climacell_data():
+    # obtain new data
     df = api_get()
+    # clean new data
     df = data_clean(df)
+    # obtain previous data
+    df_old = pd.read_csv('climate_data.csv', index_col=0)
+    # add new data on to previous data
+    merge = [df_old, df]
+    df = pd.concat(merge)
+    df.reset_index(drop = True)
+    # drop column added by concat
+    df.drop(columns =['Unnamed: 0'], inplace = True)
+    # convert observation to date time
+    df['observation_time'] =  pd.to_datetime(df['observation_time'])
+    # Filtering out any repeated time observations 
+    df.sort_values("observation_time", inplace = True) 
+    # dropping any duplicte values 
+    df.drop_duplicates(subset ="observation_time", 
+                     keep = False, inplace = True) 
+    # write new data to csv
+    df.to_csv('climate_data.csv')
+    # return new data frame
     return df
 
