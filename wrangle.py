@@ -101,7 +101,7 @@ def get_climacell_data():
     df = pd.concat(merge)
     df.reset_index(drop = True)
     # drop column added by concat
-    df.drop(columns =['Unnamed: 0'], inplace = True)
+    #df.drop(columns =['Unnamed: 0'], inplace = True)
     # convert observation to date time
     df['observation_time'] =  pd.to_datetime(df['observation_time'])
     # Filtering out any repeated time observations 
