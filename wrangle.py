@@ -31,30 +31,6 @@ def api_get():
     return df
 
 def data_clean(df):
-    #Modify Temp
-    df['temp'] = df['temp'].astype(str)
-    df['temp_degree_c']=df['temp'].str.extract(r'(\d+)')
-    df.drop(columns =['temp'], inplace = True)
-    #Modify Baro-Pressure
-    df['baro_pressure'] = df['baro_pressure'].astype(str)
-    df['baro_pressure_hPa']=df['baro_pressure'].str.extract(r'(\d+)')
-    df.drop(columns =['baro_pressure'], inplace = True)
-    #Modify Wind_speed
-    df['wind_speed'] = df['wind_speed'].astype(str)
-    df['wind_speed_m/s']=df['wind_speed'].str.extract(r'(\d+)')
-    df.drop(columns =['wind_speed'], inplace = True)
-    #Modify preciatation
-    df['precipitation'] = df['precipitation'].astype(str)
-    df['precipitation_mm/hr']=df['precipitation'].str.extract(r'(\d+)')
-    df.drop(columns =['precipitation'], inplace = True)
-    #Modify observation_time
-    df['observation_time']= df['observation_time'].astype(str)
-    df['observation_time']= df['observation_time'].str.extract(r'(\d+.\d+.\d+\d+.\d+.\d+)')
-    df['observation_time']= df['observation_time'].str.replace('T',' ')
-    df['precipitation_mm/hr'] = df['precipitation_mm/hr'].fillna(0)
-    return df
-
-def data_clean(df):
     '''
     Function modifies the colums to make sense
     '''
@@ -109,6 +85,12 @@ def get_climacell_data():
     # dropping any duplicte values 
     df.drop_duplicates(subset ="observation_time", 
                      keep = False, inplace = True) 
+    # add daily column to data frame
+    df['day'] = df.observation_time.dt.day
+    # add month column to data frame
+    # df['month'] = df.observation_time.dt.month
+    # set date as index
+    df = df.set_index('observation_time').sort_index()
     # write new data to csv
     df.to_csv('climate_data.csv')
     # return new data frame
