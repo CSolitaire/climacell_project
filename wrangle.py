@@ -86,13 +86,21 @@ def get_climacell_data():
     df.drop_duplicates(subset ="observation_time", 
                      keep = False, inplace = True) 
     # add daily column to data frame
-    df['day'] = df.observation_time.dt.day
+    #df['day'] = df.observation_time.dt.day
     # add month column to data frame
     # df['month'] = df.observation_time.dt.month
     # set date as index
-    df = df.set_index('observation_time').sort_index()
+    #df = df.set_index('observation_time').sort_index()
     # write new data to csv
     df.to_csv('climate_data.csv')
     # return new data frame
     return df
 
+def formatt_data(df):
+    # add daily column to data frame
+    df['day'] = df.observation_time.dt.day
+    # add month column to data frame
+    df['month'] = df.observation_time.dt.month
+    # set date as index
+    df = df.set_index('observation_time').sort_index()
+    return df
