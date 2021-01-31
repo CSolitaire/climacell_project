@@ -62,7 +62,7 @@ def data_clean(df):
     df['observation_time']= df['observation_time'].astype(str)
     df['observation_time']= df['observation_time'].str.extract(r'(\d+.\d+.\d+\d+.\d+.\d+)')
     df['observation_time']= df['observation_time'].str.replace('T',' ')
-    df['observation_time']= pd.to_datetime(df['observation_time'])
+    #df['observation_time']= pd.to_datetime(df['observation_time'])
     return df
 
 def get_climacell_data(cached = False):
@@ -84,7 +84,7 @@ def get_climacell_data(cached = False):
         # drop column added by concat
         #df.drop(columns =['Unnamed: 0'], inplace = True)
         # convert observation to date time
-        df['observation_time'] =  pd.to_datetime(df['observation_time'])
+        #df['observation_time'] =  pd.to_datetime(df['observation_time'])
         # Filtering out any repeated time observations 
         df.sort_values("observation_time", inplace = True) 
         # dropping any duplicte values 
@@ -98,6 +98,8 @@ def get_climacell_data(cached = False):
     return df
 
 def formatt_data(df):
+    # convert observation to date time
+    df['observation_time'] =  pd.to_datetime(df['observation_time'])
     # add daily column to data frame
     df['day'] = df.observation_time.dt.day
     # add month column to data frame
