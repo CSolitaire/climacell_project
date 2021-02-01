@@ -9,3 +9,4 @@ env.py
 .virtual_documents/
 Thumbs.db
 .vscode/
+*.html
